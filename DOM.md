@@ -234,8 +234,8 @@ Propiedades importantes:
 
 - `event.target` → elemento que originó el evento
 - `event.currentTarget` → elemento que escucha
-- `event.preventDefault`()
-- `event.stopPropagation`()
+- `event.preventDefault`() → Impide la acción predeterminada del navegador asociada a un evento
+- `event.stopPropagation`() → detiene la propagación de un evento (como un clic) hacia los elementos padres en el árbol DOM, impidiendo que los manejadores de eventos de esos elementos superiores se activen
 
 ### Fases del evento
 
