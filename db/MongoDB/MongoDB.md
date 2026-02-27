@@ -1,6 +1,55 @@
 # MongoDB Commands Reference
 
+## Connection MongoDB & Express
+### Command to install dependencies
+```js
+npm install express mongodb
+const { MongoClient, ObjectId } = require('mongodb');
+const uri = 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
+```
+```js
+async function connectDB() {
+  try {
+    await client.connect();
+    console.log("Connected to MongoDB");
+    const db = client.db('myDatabase'); // Database name
+    return db;
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+### Query Express & MongoDB
 
+**GET**
+```js
+app.get('/ENDPOINT_NAME', async (req, res) => {
+    try {
+        const db = await connectDB();
+        const data = await db.collection('collection_name').find({}).toArray();
+        res.json(data);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error retrieving data');
+    }
+});
+```
+**POST**
+```js
+app.post('/ENDPOINT_NAME', async (req, res) => {
+    const { name, email } = req.body;
+
+    try {
+        const db = await connectDB();
+        await db.collection('collection_name').insertOne({ name, email });
+        res.send('Document inserted');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error inserting document');
+    }
+});
+```
 ## Data Types in MongoDB
 | Data Type           | Category  | Description                 | Example                                |
 | ------------------- | --------- | --------------------------- | -------------------------------------- |
