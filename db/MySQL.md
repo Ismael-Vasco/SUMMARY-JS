@@ -5,6 +5,8 @@
 ### commando to install them
 ```c
 npm install express mysql2
+
+const mysql = require('mysql2');
 ```
 ```js
 const pool = mysql.createPool({
