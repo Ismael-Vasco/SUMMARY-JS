@@ -5,101 +5,91 @@
 const express = require('express');
 const multer = require('multer');
 const { parse } = require('csv-parse');
-const { Pool } = require('pg');
+const mysql = require('mysql2/promise');
 const fs = require('fs');
+require('dotenv').config();
 
 // ================= CONFIG =========================
 const app = express();
 const upload = multer({ dest: 'uploads/' });
-require('dotenv').config()
 
-// =================  CONEXION POOL ================= 
-const pool = new Pool({
-  user: process.env.USER_PSQL,
+// =================  CONEXION POOL =================
+const pool = mysql.createPool({
   host: process.env.HOST,
-  database: process.env.DATABASE,
+  user: process.env.USER_MYSQL,
   password: process.env.PASSWORD,
+  database: process.env.DATABASE,
   port: process.env.PORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
-// console.log(pool);
 
 // ================= CREAR TABLAS =================
 async function createTables() {
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS cargo (
-      id SERIAL PRIMARY KEY,
+  const queries = [
+    `CREATE TABLE IF NOT EXISTS cargo (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(45)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS empleado (
-      id SERIAL PRIMARY KEY,
+    );`,
+    `CREATE TABLE IF NOT EXISTS empleado (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(100),
       apellido VARCHAR(100),
-      cargo_id INT REFERENCES cargo(id)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS cliente (
-      id SERIAL PRIMARY KEY,
+      cargo_id INT,
+      FOREIGN KEY (cargo_id) REFERENCES cargo(id)
+    );`,
+    `CREATE TABLE IF NOT EXISTS cliente (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(100),
       apellido VARCHAR(100),
       email VARCHAR(45)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS categoria (
-      id SERIAL PRIMARY KEY,
+    );`,
+    `CREATE TABLE IF NOT EXISTS categoria (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(55)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS editorial (
-      id SERIAL PRIMARY KEY,
+    );`,
+    `CREATE TABLE IF NOT EXISTS editorial (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(55)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS autor (
-      id SERIAL PRIMARY KEY,
+    );`,
+    `CREATE TABLE IF NOT EXISTS autor (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       nombre VARCHAR(100)
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS libro (
-      id SERIAL PRIMARY KEY,
+    );`,
+    `CREATE TABLE IF NOT EXISTS libro (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       titulo VARCHAR(100),
-      autor_id INT REFERENCES autor(id),
-      categoria_id INT REFERENCES categoria(id),
-      editorial_id INT REFERENCES editorial(id),
-      anio_publicacion INTEGER,
-      precio DOUBLE PRECISION
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS prestamo (
-      id SERIAL PRIMARY KEY,
+      autor_id INT,
+      categoria_id INT,
+      editorial_id INT,
+      anio_publicacion INT,
+      precio DOUBLE,
+      FOREIGN KEY (autor_id) REFERENCES autor(id),
+      FOREIGN KEY (categoria_id) REFERENCES categoria(id),
+      FOREIGN KEY (editorial_id) REFERENCES editorial(id)
+    );`,
+    `CREATE TABLE IF NOT EXISTS prestamo (
+      id INT AUTO_INCREMENT PRIMARY KEY,
       fecha_prestamo DATE,
       fecha_devolucion DATE,
-      cliente_id INT REFERENCES cliente(id),
-      empleado_id INT REFERENCES empleado(id),
-      libro_id INT REFERENCES libro(id)
-    );
-  `);
+      cliente_id INT,
+      empleado_id INT,
+      libro_id INT,
+      FOREIGN KEY (cliente_id) REFERENCES cliente(id),
+      FOREIGN KEY (empleado_id) REFERENCES empleado(id),
+      FOREIGN KEY (libro_id) REFERENCES libro(id)
+    );`
+  ];
 
-//   console.log("Tablas creadas correctamente");
+  for (const query of queries) {
+    await pool.query(query);
+  }
+
+  console.log("Tablas creadas correctamente");
 }
 
 createTables();
-
 
 // ================= FUNCION GENERICA PARA UPLOAD =================
 function uploadCSV(table, columns) {
@@ -112,12 +102,12 @@ function uploadCSV(table, columns) {
       .on('end', async () => {
         try {
           if (rows.length) {
-            const values = rows.map(r => {
-              return `(${columns.map(col => `'${r[col]}'`).join(',')})`;
-            }).join(',');
-
+            const placeholders = rows.map(() => `(${columns.map(() => '?').join(',')})`).join(',');
+            const values = rows.flatMap(row => columns.map(col => row[col]));
+            
             await pool.query(
-              `INSERT INTO ${table} (${columns.join(',')}) VALUES ${values}`
+              `INSERT INTO ${table} (${columns.join(',')}) VALUES ${placeholders}`,
+              values
             );
           }
 
@@ -129,7 +119,6 @@ function uploadCSV(table, columns) {
       });
   };
 }
-
 
 // ================= ENDPOINTS =================
 
@@ -163,7 +152,7 @@ app.post('/api/upload/editoriales',
   uploadCSV('editorial', ['nombre'])
 );
 
-// EDITORIALES
+// AUTORES
 app.post('/api/upload/autores',
   upload.single('archivo'),
   uploadCSV('autor', ['nombre'])
@@ -193,7 +182,6 @@ app.post('/api/upload/prestamos',
     'libro_id'
   ])
 );
-
 
 // ================= SERVER =================
 app.listen(3000, () => {
