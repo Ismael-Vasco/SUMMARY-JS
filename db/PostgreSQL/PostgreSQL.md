@@ -104,15 +104,15 @@ app.post('/ENDPOINT_NAME', async (req, res) => {
 
 
 ## DDL (Data Definition Language)
-| Command           | Description                                            | Syntax                                                               |      |                                     |
-| ----------------- | ------------------------------------------------------ | -------------------------------------------------------------------- | ---- | ----------------------------------- |
-| `CREATE DATABASE` | Creates a new database.                                | `CREATE DATABASE database_name;`                                     |      |                                     |
-| `DROP DATABASE`   | Deletes an existing database.                          | `DROP DATABASE database_name;`                                       |      |                                     |
-| `CREATE TABLE`    | Creates a new table.                                   | `CREATE TABLE table_name (column1 datatype, column2 datatype, ...);` |      |                                     |
-| `DROP TABLE`      | Deletes an existing table.                             | `DROP TABLE table_name;`                                             |      |                                     |
-| `ALTER TABLE`     | Modifies the structure of an existing table.           | `ALTER TABLE table_name ADD                                          | DROP | ALTER COLUMN column_name datatype;` |
-| `TRUNCATE TABLE`  | Removes all rows from a table but keeps the structure. | `TRUNCATE TABLE table_name;`                                         |      |                                     |
-| `RENAME TABLE`    | Renames an existing table.                             | `ALTER TABLE old_name RENAME TO new_name;`                           |      |                                     |
+| Command           | Description                                            | Syntax                                                               |
+| ----------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `CREATE DATABASE` | Creates a new database.                                | `CREATE DATABASE database_name;`                                     |
+| `DROP DATABASE`   | Deletes an existing database.                          | `DROP DATABASE database_name;`                                       |
+| `CREATE TABLE`    | Creates a new table.                                   | `CREATE TABLE table_name (column1 datatype, column2 datatype, ...);` |
+| `DROP TABLE`      | Deletes an existing table.                             | `DROP TABLE table_name;`                                             |
+| `ALTER TABLE`     | Modifies the structure of an existing table.           | `ALTER TABLE table_name 'ADD' 'DROP' 'ALTER' 'COLUMN' column_name datatype;` |
+| `TRUNCATE TABLE`  | Removes all rows from a table but keeps the structure. | `TRUNCATE TABLE table_name;`                                         |
+| `RENAME TABLE`    | Renames an existing table.                             | `ALTER TABLE old_name RENAME TO new_name;`                           |
 
 
 
@@ -155,6 +155,14 @@ app.post('/ENDPOINT_NAME', async (req, res) => {
 | `SAVEPOINT`       | Sets a point to which you can roll back later. | `SAVEPOINT savepoint_name;`                      |                 |                 |
 | `SET TRANSACTION` | Sets transaction properties.                   | `SET TRANSACTION ISOLATION LEVEL {READ COMMITTED | REPEATABLE READ | SERIALIZABLE};` |
 
+### SYNTAX
+```sql
+BEGIN;                  -- Inicia la transacción
+  UPDATE cuentas SET saldo = saldo - 100 WHERE id = 1;
+  UPDATE cuentas SET saldo = saldo + 100 WHERE id = 2;
+COMMIT;
+ROLLBACK; 
+```
 
 
 ## JOIN Structures
