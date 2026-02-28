@@ -143,6 +143,16 @@ app.post('/ENDPOINT_NAME'(req, res) => {
 | `SAVEPOINT`       | Sets a point to which you can roll back later.    | `SAVEPOINT savepoint_name;`  |                                      |
 | `SET TRANSACTION` | Sets characteristics for the current transaction. | `SET TRANSACTION [READ WRITE | READ ONLY] [ISOLATION LEVEL level];` |
 
+### SYNTAX
+```sql
+START TRANSACTION;
+-- O simplemente:
+BEGIN;
+
+COMMIT;
+
+ROLLBACK;
+```
 
 ## JOIN Structures
 | Join Type       | Description                                                                        | Syntax                                                                                                  |
