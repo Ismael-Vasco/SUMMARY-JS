@@ -103,6 +103,11 @@ app.post('/ENDPOINT_NAME'(req, res) => {
 | `TRUNCATE TABLE`  | Removes all rows from a table but keeps the structure. | `TRUNCATE TABLE table_name;`                                         |      |                               |
 | `RENAME TABLE`    | Renames an existing table.                             | `RENAME TABLE old_name TO new_name;`                                 |      |                               |
 
+DELECT ALL RECORDS AND START ID AGAIN IN `1`
+```
+DELETE FROM nombre_tabla;
+ALTER TABLE nombre_tabla AUTO_INCREMENT = 1;
+```
 
 ### ALTER
 | Command           | Description                                           | Syntax                                                                                 |
