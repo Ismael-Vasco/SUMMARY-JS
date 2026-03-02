@@ -115,6 +115,11 @@ app.post('/ENDPOINT_NAME', async (req, res) => {
 | `RENAME TABLE`    | Renames an existing table.                             | `ALTER TABLE old_name RENAME TO new_name;`                           |
 
 
+DELECT ALL RECORDS AND START ID AGAIN IN `1`
+```
+TRUNCATE TABLE nombre_de_tu_tabla RESTART IDENTITY;
+```
+
 
 ### ALTER
 | Command             | Description                   | Syntax                                                                                 |
